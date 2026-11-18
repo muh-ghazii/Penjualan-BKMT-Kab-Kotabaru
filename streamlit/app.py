@@ -49,6 +49,8 @@ h1{font-size:1.65rem !important;margin-bottom:0 !important}
 [data-baseweb="popover"] *,[data-baseweb="menu"] *{background:#fff;color:#111827}
 button[data-baseweb="tab"]{color:#111827 !important}
 .stButton button,.stDownloadButton button{background:#fff !important;color:#111827 !important;border:1px solid #C9D3E3 !important}
+.insight{background:#FFFFFF;border:1px solid #E1E6EE;border-left:4px solid #2A78D6;border-radius:6px;padding:8px 12px;margin:-4px 0 14px 0;font-size:0.86rem;line-height:1.45;color:#111827}
+.insight b{color:#111827}
 </style>""", unsafe_allow_html=True)
 
 
@@ -195,6 +197,11 @@ def klik(fig, key, kolom_state, nilai_dari="y"):
         minta_filter(kolom_state, pt.get(nilai_dari) if nilai_dari in pt else pt.get("label", pt.get("customdata")))
 
 
+def insight(teks):
+    """Kotak insight di bawah grafik; teks dihitung ulang mengikuti filter."""
+    st.markdown('<div class="insight"><b>Insight.</b> %s</div>' % teks, unsafe_allow_html=True)
+
+
 def grup(df, by, **agg):
     return df.groupby(by, as_index=False).agg(**agg)
 
@@ -226,6 +233,15 @@ with tab_dash:
         fig.update_layout(annotations=[dict(text="○ = bulan parsial (belum sebulan penuh)", xref="paper", yref="paper",
                                             x=0, y=-0.22, showarrow=False, font=dict(size=10, color=INK2))])
         klik(fig, "g1", "f_bulan", "x")
+        if len(pen) >= 2:
+            a, b = pen.iloc[0], pen.iloc[-1]
+            arah = "naik" if b["T"] > a["T"] else "turun"
+            ubah = abs(b["T"] / a["T"] - 1) if a["T"] else 0
+            insight("Penjualan bulan penuh %s dari %s (%s) ke %s (%s), sekitar %s. Puncaknya %s dengan %s, terendah %s dengan %s. "
+                    "Bulan parsial tidak dibandingkan karena datanya belum sebulan penuh." % (
+                        arah, a["Bulan"], jt(a["T"]), b["Bulan"], jt(b["T"]), pct(ubah), hi["Bulan"], jt(hi["T"]), lo["Bulan"], jt(lo["T"])))
+        else:
+            insight("Total penjualan pada pilihan ini %s. Pilih lebih dari satu bulan penuh untuk melihat arah tren." % jt(d["T"].sum()))
 
     # 2
     with c2:
@@ -237,6 +253,14 @@ with tab_dash:
         rapikan(fig, "2 · Penjualan per kategori produk (klik untuk filter)", legend=False)
         fig.update_xaxes(range=[0, d["T"].max() * 1.25], tickformat=",.0s")
         klik(fig, "g2", "f_kat", "y")
+        tot_k = d["T"].sum()
+        t1 = d.iloc[-1]
+        if len(d) > 1:
+            t2 = d.iloc[-2]
+            insight("<b>%s</b> menyumbang %s penjualan (%s), disusul %s (%s). Dua kategori teratas menguasai %s dari total." % (
+                t1["Kategori Produk"], pct(t1["T"] / tot_k), jt(t1["T"]), t2["Kategori Produk"], jt(t2["T"]), pct((t1["T"] + t2["T"]) / tot_k)))
+        else:
+            insight("Hanya kategori <b>%s</b> pada pilihan ini, total %s." % (t1["Kategori Produk"], jt(t1["T"])))
 
     # 3
     with c3:
@@ -249,6 +273,10 @@ with tab_dash:
         fig.update_xaxes(range=[0, d["T"].max() * 1.25], tickformat=",.0s")
         fig.update_yaxes(automargin=True)
         st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
+        tot_j = d["T"].sum()
+        j1, j0 = d.iloc[-1], d.iloc[0]
+        insight("Jenis terlaris <b>%s</b> dengan %s (%s). %s" % (j1["Jenis Produk"], jt(j1["T"]), pct(j1["T"] / tot_j),
+                ("Terendah <b>%s</b> hanya %s (%s)." % (j0["Jenis Produk"], jt(j0["T"]), pct(j0["T"] / tot_j))) if len(d) > 1 else ""))
 
     c1, c2, c3 = st.columns(3)
 
@@ -284,6 +312,11 @@ with tab_dash:
         urut = pk.sort_values("T", ascending=False)
         st.caption("Terbesar: **%s** (%s). Biru lebih gelap = penjualan lebih besar; abu-abu = belum ada transaksi. "
                    "P. Laut Sigam digabung dengan P. Laut Utara pada peta GADM." % (urut.iloc[0]["Kecamatan"], pct(urut.iloc[0]["T"] / total)))
+        top3 = urut["T"].head(3).sum() / total
+        pj = pk.sort_values("Per Jiwa", ascending=False).iloc[0]
+        insight("<b>%s</b> terbesar dengan %s penjualan; tiga kecamatan teratas menguasai %s. Per penduduk, <b>%s</b> tertinggi "
+                "(Rp%s per jiwa), jadi kecamatan terbesar belum tentu yang paling tergarap." % (
+                    urut.iloc[0]["Kecamatan"], pct(urut.iloc[0]["T"] / total), pct(top3), pj["Kecamatan"], ribuan(pj["Per Jiwa"])))
 
     # 5
     with c2:
@@ -294,6 +327,10 @@ with tab_dash:
         rapikan(fig, "5 · Saluran penjualan")
         fig.update_layout(legend=dict(orientation="h", y=-0.05))
         klik(fig, "g5", "f_sal", "label")
+        s1 = d.iloc[0]
+        insight("Saluran utama <b>%s</b> dengan %s penjualan (%s)%s." % (
+            s1["Saluran Penjualan"], pct(s1["T"] / d["T"].sum()), jt(s1["T"]),
+            (", disusul %s (%s)" % (d.iloc[1]["Saluran Penjualan"], pct(d.iloc[1]["T"] / d["T"].sum()))) if len(d) > 1 else ""))
 
     # 6
     with c3:
@@ -307,6 +344,15 @@ with tab_dash:
         fig.update_yaxes(title=None, tickformat=",.0s")
         fig.update_xaxes(title=None)
         klik(fig, "g6", "f_met", "customdata")
+        mt = d.groupby("Metode Pembayaran")["T"].sum()
+        dom = mt.idxmax()
+        pv = d.pivot_table(index="Bulan", columns="Metode Pembayaran", values="T", aggfunc="sum").fillna(0)
+        ekstra = ""
+        if "Tunai" in pv.columns and len(pv) > 1:
+            ptunai = pv["Tunai"] / pv.sum(axis=1)
+            bt = ptunai.idxmax()
+            ekstra = " Porsi tunai paling besar terjadi pada %s (%s)." % (bt, pct(ptunai[bt]))
+        insight("Pembayaran <b>%s</b> mendominasi dengan %s dari total nilai penjualan.%s" % (dom, pct(mt[dom] / mt.sum()), ekstra))
 
     c1, c2, c3 = st.columns(3)
 
@@ -328,6 +374,12 @@ with tab_dash:
         fig.update_layout(barmode="group")
         fig.update_yaxes(tickformat=".0%", range=[0, max(d["Porsi Unit"].max(), d["Porsi Nilai"].max()) * 1.25])
         st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
+        d["selisih"] = d["Porsi Nilai"] - d["Porsi Unit"]
+        up, dn = d.loc[d["selisih"].idxmax()], d.loc[d["selisih"].idxmin()]
+        insight("<b>%s</b> hanya %s dari unit tetapi %s dari nilai penjualan, artinya harga per unit tinggi. "
+                "Sebaliknya <b>%s</b> menyumbang %s unit namun %s nilai." % (
+                    up["Kategori Produk"], pct(up["Porsi Unit"]), pct(up["Porsi Nilai"]),
+                    dn["Kategori Produk"], pct(dn["Porsi Unit"]), pct(dn["Porsi Nilai"])))
 
     # 8
     with c2:
@@ -339,6 +391,9 @@ with tab_dash:
         fig.update_xaxes(title=None)
         fig.update_yaxes(title=None)
         st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
+        b = d.loc[d["N"].idxmax()]
+        insight("Kombinasi tersering adalah <b>%s</b> dengan <b>%s</b>: %s transaksi (%s dari seluruh transaksi)." % (
+            b["Saluran Penjualan"], b["Metode Pembayaran"], ribuan(b["N"]), pct(b["N"] / d["N"].sum())))
 
     # 9
     with c3:
@@ -352,6 +407,10 @@ with tab_dash:
         fig.update_yaxes(autorange="reversed", gridcolor="white")
         fig.update_xaxes(gridcolor="white")
         st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
+        zs = z.stack()
+        (kc, kt), vv = zs.idxmax(), zs.max()
+        insight("Sel terbesar: <b>%s</b> untuk kategori <b>%s</b> dengan %s (%s dari total). "
+                "Sel kosong berarti belum ada transaksi pada kombinasi itu." % (kc, kt, jt(vv), pct(vv / total)))
 
     c1 = st.container()
 
@@ -368,6 +427,10 @@ with tab_dash:
         fig.update_xaxes(categoryorder="array", categoryarray=HARI)
         fig.update_yaxes(range=[0, h["Rata"].max() * 1.2], tickformat=",.0s")
         st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
+        hb, hk = h.loc[h["Rata"].idxmax()], h.loc[h["Rata"].idxmin()]
+        insight("Hari terbaik <b>%s</b> dengan rata-rata %s per hari, hari terendah <b>%s</b> (%s). "
+                "Rata-rata dihitung dari total penjualan dibagi jumlah hari kalender yang bersangkutan." % (
+                    hb["Hari"], jt(hb["Rata"], 2), hk["Hari"], jt(hk["Rata"], 2)))
 
 # ------------------------------------------------------------------ tab data
 with tab_data:
