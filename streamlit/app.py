@@ -39,6 +39,16 @@ st.markdown("""
 [data-testid="stMetric"]{background:#fff;border:1px solid #E1E6EE;border-radius:8px;padding:10px 14px}
 [data-testid="stMetricValue"]{font-size:1.6rem}
 h1{font-size:1.65rem !important;margin-bottom:0 !important}
+/* Paksa tema terang apa pun pengaturan tema/mode gelap di browser atau Streamlit Cloud */
+.stApp,[data-testid="stAppViewContainer"],[data-testid="stHeader"]{background:#EEF3FA !important;color:#111827 !important}
+[data-testid="stSidebar"],[data-testid="stSidebar"] > div{background:#FFFFFF !important}
+.stApp h1,.stApp h2,.stApp h3,.stApp p,.stApp label,.stApp span,.stApp li,[data-testid="stCaptionContainer"]{color:#111827}
+[data-testid="stMetricLabel"],[data-testid="stMetricLabel"] *{color:#4B5563 !important}
+[data-testid="stMetricValue"],[data-testid="stMetricValue"] *{color:#111827 !important}
+[data-baseweb="select"] > div,[data-baseweb="select"] input{background:#fff !important;color:#111827 !important}
+[data-baseweb="popover"] *,[data-baseweb="menu"] *{background:#fff;color:#111827}
+button[data-baseweb="tab"]{color:#111827 !important}
+.stButton button,.stDownloadButton button{background:#fff !important;color:#111827 !important;border:1px solid #C9D3E3 !important}
 </style>""", unsafe_allow_html=True)
 
 
