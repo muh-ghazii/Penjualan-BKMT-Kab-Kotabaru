@@ -1,0 +1,3 @@
+Tipe_Pesanan,Transaksi,Unit,Penjualan,Porsi_Penjualan_pct,Porsi_Transaksi_pct,Porsi_Unit_pct,Rata2_Transaksi
+Borongan (>=5 unit),81,544,61612000,22.9,7.4,25.1,760642.0
+Reguler (1-4 unit),1008,1625,207883000,77.1,92.6,74.9,206233.0

@@ -1,0 +1,33 @@
+{
+  "name": "BKMT Kotabaru",
+  "dataColors": ["#2A78D6", "#EB6834", "#1BAF7A", "#8D8C86", "#C9C8C2", "#032666", "#86B6EF", "#F2A37F"],
+  "background": "#FFFFFF",
+  "foreground": "#111827",
+  "tableAccent": "#2A78D6",
+  "good": "#1BAF7A",
+  "neutral": "#C9C8C2",
+  "bad": "#EB6834",
+  "maximum": "#1C5CAB",
+  "center": "#86B6EF",
+  "minimum": "#F4F8FE",
+  "textClasses": {
+    "callout": {"fontFace": "Segoe UI Semibold", "fontSize": 26, "color": "#032666"},
+    "title": {"fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#111827"},
+    "header": {"fontFace": "Segoe UI Semibold", "fontSize": 11, "color": "#111827"},
+    "label": {"fontFace": "Segoe UI", "fontSize": 10, "color": "#4B5563"}
+  },
+  "visualStyles": {
+    "page": {
+      "*": {
+        "background": [{"color": {"solid": {"color": "#E8F1FC"}}, "transparency": 0}]
+      }
+    },
+    "*": {
+      "*": {
+        "background": [{"show": true, "color": {"solid": {"color": "#FFFFFF"}}, "transparency": 0}],
+        "border": [{"show": false}],
+        "dropShadow": [{"show": false}]
+      }
+    }
+  }
+}

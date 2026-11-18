@@ -1,0 +1,37 @@
+{
+  "validasi": {
+    "baris": 1089,
+    "kolom": 12,
+    "nilai_kosong": 0,
+    "duplikat_baris": 0,
+    "id_unik": true,
+    "total_konsisten": true,
+    "tanggal_min": "2025-06-23",
+    "tanggal_maks": "2026-06-27",
+    "nama_unik": 363,
+    "nama_lebih_dari_1_kecamatan_pct": 57.9
+  },
+  "kpi": {
+    "total_penjualan": 269495000,
+    "jumlah_transaksi": 1089,
+    "unit_terjual": 2169,
+    "rata_rata_transaksi": 247470,
+    "median_transaksi": 165000,
+    "porsi_setelan_pct": 63.9,
+    "porsi_borongan_pct": 22.9,
+    "porsi_transfer_pct": 50.6
+  },
+  "uji": {
+    "bulanan_sd_observasi": 3615424,
+    "bulanan_sd_acak_rata2": 4143542,
+    "bulanan_p_permutasi": 0.741,
+    "bulanan_rata2_bulan_penuh": 22281909,
+    "korelasi_borongan_vs_total_bulanan": 0.66,
+    "hari_chi2": 42.9,
+    "hari_p": 1.2147586091243706e-07,
+    "kecamatan_x_kategori_p": 0.16429397373786117,
+    "kecamatan_x_saluran_p": 2.5841383463813637e-33,
+    "saluran_x_metode_p": 3.0616770529661184e-59,
+    "nilai_trx_antar_kecamatan_kruskal_p": 0.8397630926291298
+  }
+}

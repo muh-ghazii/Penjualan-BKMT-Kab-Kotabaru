@@ -1,0 +1,119 @@
+// =====================================================================
+// MEASURE DAX - Dashboard Penjualan Seragam BKMT Kotabaru
+// Cara pakai: klik tabel "Penjualan" di panel Data -> New measure ->
+// tempel SATU blok (mulai dari nama measure sampai sebelum blok berikutnya).
+// =====================================================================
+
+// ---------- A. Measure dasar (KPI) ----------
+Total Penjualan = SUM ( Penjualan[Total] )
+
+Jumlah Transaksi = COUNTROWS ( Penjualan )
+
+Unit Terjual = SUM ( Penjualan[Jumlah] )
+
+Rata-rata per Transaksi = DIVIDE ( [Total Penjualan], [Jumlah Transaksi] )
+
+Porsi Setelan % =
+DIVIDE (
+    CALCULATE ( [Total Penjualan], Penjualan[Kategori Produk] = "Setelan" ),
+    [Total Penjualan]
+)
+
+// ---------- B. Measure untuk visualisasi tertentu ----------
+// Catatan: Kategori Produk diurutkan memakai kolom Kategori Urut (Sort by column),
+// jadi kedua kolom harus dilepas bersama; kalau tidak, hasilnya selalu 100%.
+
+// No.7 - porsi unit dan porsi nilai tiap kategori (batang berkelompok)
+Porsi Unit Kategori % =
+DIVIDE (
+    [Unit Terjual],
+    CALCULATE ( [Unit Terjual], ALLSELECTED ( Penjualan[Kategori Produk], Penjualan[Kategori Urut] ) )
+)
+
+Porsi Penjualan Kategori % =
+DIVIDE (
+    [Total Penjualan],
+    CALCULATE ( [Total Penjualan], ALLSELECTED ( Penjualan[Kategori Produk], Penjualan[Kategori Urut] ) )
+)
+
+// No.9 - heatmap: porsi kategori DI DALAM tiap kecamatan (tiap baris = 100%)
+Porsi dalam Kecamatan % =
+DIVIDE (
+    [Total Penjualan],
+    CALCULATE ( [Total Penjualan], REMOVEFILTERS ( Penjualan[Kategori Produk], Penjualan[Kategori Urut] ) )
+)
+
+// No.8 - porsi transaksi tiap metode DI DALAM tiap saluran (tiap batang = 100%)
+Porsi Transaksi dalam Saluran % =
+DIVIDE (
+    [Jumlah Transaksi],
+    CALCULATE ( [Jumlah Transaksi], REMOVEFILTERS ( Penjualan[Metode Pembayaran] ) )
+)
+
+// No.10 - rata-rata penjualan per hari kalender (hari tanpa transaksi ikut dihitung)
+Penjualan per Hari = DIVIDE ( [Total Penjualan], COUNTROWS ( Kalender ) )
+
+// No.4 - tooltip peta: penjualan per penduduk
+Penduduk = SUM ( Kecamatan[Penduduk 2024] )
+
+Penjualan per Jiwa = DIVIDE ( [Total Penjualan], [Penduduk] )
+
+// ---------- C. Judul dinamis (kalimat temuan yang ikut berubah saat difilter) ----------
+// Pasang di: Format visual -> General -> Title -> Text -> tombol fx -> Field value -> pilih measure.
+
+Judul V1 =
+VAR tbl =
+    FILTER (
+        ADDCOLUMNS (
+            SUMMARIZE ( Kalender, Kalender[Bulan], Kalender[Bulan Parsial] ),
+            "@p", [Total Penjualan]
+        ),
+        NOT Kalender[Bulan Parsial] && [@p] > 0
+    )
+VAR hi = TOPN ( 1, tbl, [@p], DESC )
+VAR lo = TOPN ( 1, tbl, [@p], ASC )
+RETURN
+    "1 · Tren bulanan: tertinggi " & MAXX ( hi, Kalender[Bulan] ) & " (Rp"
+        & FORMAT ( MAXX ( hi, [@p] ) / 1e6, "0.0" ) & " jt), terendah "
+        & MAXX ( lo, Kalender[Bulan] ) & " (Rp"
+        & FORMAT ( MAXX ( lo, [@p] ) / 1e6, "0.0" ) & " jt)"
+
+Judul V2 =
+VAR tbl = ADDCOLUMNS ( VALUES ( Penjualan[Kategori Produk] ), "@p", [Total Penjualan] )
+VAR t1 = TOPN ( 1, tbl, [@p], DESC )
+RETURN
+    "2 · " & MAXX ( t1, Penjualan[Kategori Produk] ) & " menyumbang "
+        & FORMAT ( DIVIDE ( MAXX ( t1, [@p] ), [Total Penjualan] ), "0.0%" ) & " penjualan"
+
+Judul V3 =
+VAR tbl = ADDCOLUMNS ( VALUES ( Penjualan[Jenis Produk] ), "@p", [Total Penjualan] )
+VAR t1 = TOPN ( 1, tbl, [@p], DESC )
+VAR t2 = TOPN ( 2, tbl, [@p], DESC )
+RETURN
+    "3 · " & MAXX ( t1, Penjualan[Jenis Produk] ) & " = "
+        & FORMAT ( DIVIDE ( MAXX ( t2, [@p] ), MINX ( t2, [@p] ) ), "0.0" )
+        & "× jenis produk terlaris kedua"
+
+Judul V4 =
+VAR tbl = FILTER ( ADDCOLUMNS ( VALUES ( Kecamatan[Kecamatan] ), "@p", [Total Penjualan] ), [@p] > 0 )
+VAR t1 = TOPN ( 1, tbl, [@p], DESC )
+RETURN
+    "4 · " & MAXX ( t1, Kecamatan[Kecamatan] ) & " terbesar: "
+        & FORMAT ( DIVIDE ( MAXX ( t1, [@p] ), [Total Penjualan] ), "0.0%" ) & " penjualan"
+
+Judul V5 =
+VAR tbl = ADDCOLUMNS ( VALUES ( Penjualan[Saluran Penjualan] ), "@p", [Total Penjualan] )
+VAR t1 = TOPN ( 1, tbl, [@p], DESC )
+RETURN
+    "5 · " & MAXX ( t1, Penjualan[Saluran Penjualan] ) & " saluran terbesar: "
+        & FORMAT ( DIVIDE ( MAXX ( t1, [@p] ), [Total Penjualan] ), "0.0%" ) & " penjualan"
+
+Judul V10 =
+VAR tbl = ADDCOLUMNS ( VALUES ( Kalender[Hari] ), "@p", [Penjualan per Hari] )
+VAR lo = TOPN ( 1, tbl, [@p], ASC )
+VAR hi = TOPN ( 1, tbl, [@p], DESC )
+RETURN
+    "10 · Terendah " & MAXX ( lo, Kalender[Hari] ) & " (Rp"
+        & FORMAT ( MAXX ( lo, [@p] ) / 1000, "#,0" ) & " rb/hari), tertinggi "
+        & MAXX ( hi, Kalender[Hari] ) & " (Rp"
+        & FORMAT ( MAXX ( hi, [@p] ) / 1000, "#,0" ) & " rb/hari)"

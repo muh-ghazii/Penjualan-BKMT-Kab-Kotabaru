@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard Penjualan BKMT Kotabaru</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEF3FA;--card:#FFFFFF;--ink:#111827;--ink2:#4B5563;--line:#E1E6EE;--blue:#2A78D6;--orange:#EB6834;--aqua:#1BAF7A;--gray:#C9C8C2;--grayd:#8D8C86}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 Inter,"Segoe UI",system-ui,-apple-system,sans-serif}
+.wrap{max-width:1880px;margin:0 auto;padding-block:16px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+h1{margin:0;font-size:clamp(18px,2.1vw,26px);font-weight:700;text-wrap:balance}
+.sub{color:var(--ink2);font-size:13px;margin-top:2px}
+.slicers{display:flex;flex-wrap:wrap;gap:10px}
+.slicers label{display:flex;flex-direction:column;font-size:12px;font-weight:600;color:var(--ink2);gap:3px;min-width:0}
+select{font:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid #C9D3E2;border-radius:6px;padding:6px 28px 6px 9px;min-width:190px;max-width:100%}
+button.reset{font:inherit;font-size:13px;align-self:flex-end;border:1px solid #C9D3E2;background:#fff;border-radius:6px;padding:6px 12px;cursor:pointer;color:var(--ink)}
+button.reset:hover{border-color:var(--blue);color:var(--blue)}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.kpi{background:var(--card);border-radius:8px;padding:12px 14px;border:1px solid var(--line);min-width:0}
+.kpi .l{font-size:12px;color:var(--ink2)}
+.kpi .v{font-size:clamp(20px,2vw,26px);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row{display:grid;gap:12px;margin-bottom:12px}
+.r1{grid-template-columns:1.42fr 1.05fr 1fr}
+.r2{grid-template-columns:1.1fr 1.25fr 1.06fr}
+.r3{grid-template-columns:1.25fr 1.35fr .82fr 1.02fr}
+.card{background:var(--card);border-radius:8px;border:1px solid var(--line);padding:10px 12px 8px;min-width:0;display:flex;flex-direction:column}
+.card h2{margin:0 0 2px;font-size:13.5px;font-weight:700;line-height:1.3;text-wrap:balance;min-height:2.6em}
+.chart{width:100%;height:270px;flex:1 0 auto}
+.note{font-size:11px;color:var(--ink2);margin-top:2px}
+.split{display:flex;gap:8px;flex:1;min-height:300px}
+.split .chart{flex:1 1 50%;min-width:0;height:auto;min-height:300px}
+.legend{flex:1 1 50%;display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0;font-size:12px}
+.legend .it{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.legend .sw{width:12px;height:12px;border-radius:2px;flex:none;margin-top:3px}
+.legend .nm{font-weight:500}
+.legend .it.top .nm{font-weight:700}
+.legend .dt{color:var(--ink2);font-size:11px;font-variant-numeric:tabular-nums}
+footer{color:var(--ink2);font-size:12px;margin-top:6px;display:flex;flex-wrap:wrap;gap:6px 18px}
+footer a{color:var(--blue)}
+@media (max-width:1200px){.r1,.r2{grid-template-columns:1fr 1fr}.r3{grid-template-columns:1fr 1fr}.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:720px){.r1,.r2,.r3{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}select{min-width:0;width:100%}.slicers{width:100%}.slicers label{flex:1 1 140px}.split{flex-direction:column}.split .chart{min-height:240px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Dashboard Penjualan Produk BKMT Kabupaten Kotabaru</h1>
+    <div class="sub">Jun 2025 – Jun 2026 · 1.089 transaksi · versi web dari dashboard Power BI (isi dan nomor visual sama dengan laporan)</div>
+  </div>
+  <div class="slicers">
+    <label>Bulan<select id="fBulan"></select></label>
+    <label>Kategori Produk<select id="fKat"></select></label>
+    <label>Kecamatan<select id="fKec"></select></label>
+    <button class="reset" id="reset" type="button">Hapus filter</button>
+  </div>
+</header>
+
+<section class="kpis" aria-label="Indikator utama">
+  <div class="kpi"><div class="l">Total Penjualan</div><div class="v" id="kTotal">–</div></div>
+  <div class="kpi"><div class="l">Jumlah Transaksi</div><div class="v" id="kTrx">–</div></div>
+  <div class="kpi"><div class="l">Unit Terjual</div><div class="v" id="kUnit">–</div></div>
+  <div class="kpi"><div class="l">Rata-rata per Transaksi</div><div class="v" id="kAvg">–</div></div>
+  <div class="kpi"><div class="l">Porsi Setelan</div><div class="v" id="kSet">–</div></div>
+</section>
+
+<section class="row r1">
+  <div class="card"><h2 id="t1"></h2><div class="chart" id="c1"></div><div class="note">○ = bulan parsial (data belum sebulan penuh), tidak dihitung sebagai tertinggi/terendah.</div></div>
+  <div class="card"><h2 id="t6"></h2><div class="chart" id="c6"></div><div class="note">○ = bulan parsial (data belum sebulan penuh).</div></div>
+  <div class="card"><h2 id="t10"></h2><div class="chart" id="c10"></div><div class="note">Rata-rata penjualan per hari kalender; hari tanpa transaksi ikut dihitung. Label = Rp ribu.</div></div>
+</section>
+<section class="row r2">
+  <div class="card"><h2 id="t2"></h2><div class="chart" id="c2"></div></div>
+  <div class="card"><h2 id="t3"></h2><div class="chart" id="c3"></div><div class="note">Label = Rp juta.</div></div>
+  <div class="card"><h2 id="t7"></h2><div class="chart" id="c7"></div></div>
+</section>
+<section class="row r3">
+  <div class="card"><h2 id="t4"></h2><div class="split"><div class="chart" id="c4"></div><div class="legend" id="l4"></div></div><div class="note">Warna = total penjualan. Abu-abu = belum ada transaksi. P. Laut Sigam belum terpisah di peta GADM, warnanya digabung dengan P. Laut Utara.</div></div>
+  <div class="card"><h2 id="t9"></h2><div class="chart" id="c9"></div><div class="note">Angka = % nilai penjualan di dalam tiap kecamatan.</div></div>
+  <div class="card"><h2 id="t5"></h2><div class="split"><div class="chart" id="c5"></div><div class="legend" id="l5"></div></div></div>
+  <div class="card"><h2 id="t8"></h2><div class="chart" id="c8"></div></div>
+</section>
+<footer>
+  <span>Sumber data: <a href="https://www.kaggle.com/datasets/mghazirakhmadi/data-penjualan-bkmt-kab-kotabaru" target="_blank" rel="noopener">Data Penjualan BKMT Kab. Kotabaru (Kaggle)</a></span>
+  <span>Klik batang kategori, titik bulan, atau nama kecamatan untuk menyaring.</span>
+  <span>Muhammad Ghazi Rakhmadi · 2410817310009 · UAS Visualisasi Data</span>
+</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+<script src="data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var B = window.BKMT, D = B.dims;
+  var BLUE = "#2A78D6", ORANGE = "#EB6834", AQUA = "#1BAF7A", GRAY = "#C9C8C2", GRAYD = "#8D8C86", INK = "#111827", INK2 = "#4B5563", GRID = "#E6E5E0";
+  var BLN = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+  var HARI = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+  var FONT = "Inter, Segoe UI, system-ui, sans-serif";
+
+  // ---------- format angka gaya Indonesia (sama dengan skrip Power BI) ----------
+  function koma(s) { return s.replace(".", ","); }
+  function ribuan(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+  function jt(v, d) { return koma("Rp" + (v / 1e6).toFixed(d == null ? 1 : d) + " jt"); }
+  function rb(v) { return "Rp" + ribuan(v / 1e3) + " rb"; }
+  function pct(v, d) { return koma((v * 100).toFixed(d == null ? 1 : d) + "%"); }
+
+  // ---------- kalender ----------
+  function bulanKey(s) { return s.slice(0, 7); }
+  function bulanLabel(k) { return BLN[+k.slice(5, 7) - 1] + " " + k.slice(0, 4); }
+  var hariList = [], d0 = new Date(B.mulai + "T00:00:00Z"), d1 = new Date(B.akhir + "T00:00:00Z");
+  for (var t = d0; t <= d1; t = new Date(t.getTime() + 864e5)) hariList.push(t.toISOString().slice(0, 10));
+  var bulanAll = []; hariList.forEach(function (h) { var k = bulanKey(h); if (bulanAll.indexOf(k) < 0) bulanAll.push(k); });
+  var hariPerBulan = {}; hariList.forEach(function (h) { var k = bulanKey(h); hariPerBulan[k] = (hariPerBulan[k] || 0) + 1; });
+  function parsial(k) { var y = +k.slice(0, 4), m = +k.slice(5, 7); return hariPerBulan[k] < new Date(Date.UTC(y, m, 0)).getUTCDate(); }
+  function hariKe(s) { var w = new Date(s + "T00:00:00Z").getUTCDay(); return (w + 6) % 7; } // 0 = Senin
+
+  var R = B.rows.map(function (r) { return { tgl: r[0], bln: bulanKey(r[0]), kec: r[1], kat: r[2], jenis: r[3], sal: r[4], met: r[5], qty: r[6], tot: r[7] }; });
+
+  // ---------- slicer ----------
+  var fB = document.getElementById("fBulan"), fK = document.getElementById("fKat"), fC = document.getElementById("fKec");
+  function isi(sel, items, lab) { sel.innerHTML = '<option value="">Semua</option>' + items.map(function (v, i) { return '<option value="' + (typeof v === "string" && lab ? v : i) + '">' + (lab ? lab(v) : v) + "</option>"; }).join(""); }
+  isi(fB, bulanAll, bulanLabel); isi(fK, D.kat); isi(fC, D.kec);
+  var F = { bln: "", kat: "", kec: "" };
+  function terapkan() { F.bln = fB.value; F.kat = fK.value; F.kec = fC.value; render(); }
+  [fB, fK, fC].forEach(function (s) { s.addEventListener("change", terapkan); });
+  document.getElementById("reset").addEventListener("click", function () { fB.value = fK.value = fC.value = ""; terapkan(); });
+  function setF(sel, val) { sel.value = sel.value === String(val) ? "" : String(val); terapkan(); }
+
+  // ---------- grafik ----------
+  echarts.registerMap("kotabaru", B.geo);
+  var C = {}; ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8", "c9", "c10"].forEach(function (id) { C[id] = echarts.init(document.getElementById(id), null, { renderer: "canvas" }); });
+  window.addEventListener("resize", function () { Object.keys(C).forEach(function (k) { C[k].resize(); }); });
+  var AX = { axisLine: { lineStyle: { color: GRID } }, axisTick: { show: false }, axisLabel: { color: INK2, fontSize: 11, fontFamily: FONT }, splitLine: { lineStyle: { color: GRID, width: 0.8 } } };
+  function ax(extra) { return Object.assign(JSON.parse(JSON.stringify(AX)), extra || {}); }
+  var TT = { backgroundColor: "#fff", borderColor: GRID, textStyle: { color: INK, fontSize: 12, fontFamily: FONT } };
+  function title(id, s) { document.getElementById(id).textContent = s; }
+  function sum(a, f) { var s = 0; for (var i = 0; i < a.length; i++) s += f(a[i]); return s; }
+  function grp(a, key, val) { var o = {}; a.forEach(function (r) { var k = key(r); o[k] = (o[k] || 0) + val(r); }); return o; }
+
+  function render() {
+    var r = R.filter(function (x) { return (!F.bln || x.bln === F.bln) && (F.kat === "" || x.kat === +F.kat) && (F.kec === "" || x.kec === +F.kec); });
+    var tot = sum(r, function (x) { return x.tot; }), trx = r.length, unit = sum(r, function (x) { return x.qty; });
+    var setel = sum(r.filter(function (x) { return x.kat === 0; }), function (x) { return x.tot; });
+    document.getElementById("kTotal").textContent = jt(tot);
+    document.getElementById("kTrx").textContent = ribuan(trx);
+    document.getElementById("kUnit").textContent = ribuan(unit);
+    document.getElementById("kAvg").textContent = trx ? "Rp" + ribuan(tot / trx) : "–";
+    document.getElementById("kSet").textContent = tot ? pct(setel / tot) : "–";
+    var bulan = F.bln ? [F.bln] : bulanAll;
+
+    // ---- 1 · tren bulanan
+    var pb = grp(r, function (x) { return x.bln; }, function (x) { return x.tot; });
+    var d1 = bulan.map(function (k) { return { k: k, v: pb[k] || 0, p: parsial(k) }; });
+    var pen = d1.filter(function (x) { return !x.p && x.v > 0; });
+    if (pen.length > 1) {
+      var hi = pen.reduce(function (a, b) { return b.v > a.v ? b : a; }), lo = pen.reduce(function (a, b) { return b.v < a.v ? b : a; });
+      title("t1", "1 · Tren bulanan: tertinggi " + bulanLabel(hi.k) + " (" + jt(hi.v) + "), terendah " + bulanLabel(lo.k) + " (" + jt(lo.v) + ")");
+    } else title("t1", "1 · Tren penjualan bulanan");
+    C.c1.setOption({ animation: false, tooltip: Object.assign({ trigger: "axis", valueFormatter: function (v) { return jt(v); } }, TT),
+      grid: { left: 52, right: 14, top: 22, bottom: 52 },
+      xAxis: ax({ type: "category", data: d1.map(function (x) { return bulanLabel(x.k); }), axisLabel: { color: INK2, fontSize: 10.5, rotate: 45, fontFamily: FONT }, splitLine: { show: false } }),
+      yAxis: ax({ type: "value", min: 0, axisLabel: { color: INK2, fontSize: 11, formatter: function (v) { return "Rp" + Math.round(v / 1e6) + " jt"; } } }),
+      series: [{ type: "line", data: d1.map(function (x) { return { value: x.v, symbol: "circle", symbolSize: 8, itemStyle: { color: x.p ? "#fff" : BLUE, borderColor: BLUE, borderWidth: 1.8 } }; }),
+        lineStyle: { color: BLUE, width: 2 }, label: { show: true, position: "top", fontSize: 10, color: INK, formatter: function (p) { return jt(p.value); } } }] }, true);
+
+    // ---- 6 · transfer vs tunai
+    var s6 = D.met.map(function (m, j) {
+      var g = grp(r.filter(function (x) { return x.met === j; }), function (x) { return x.bln; }, function (x) { return x.tot; });
+      var c = j === 0 ? BLUE : ORANGE;
+      return { name: m, type: "line", lineStyle: { color: c, width: 2 }, itemStyle: { color: c },
+        data: bulan.map(function (k) { return { value: g[k] || 0, symbol: "circle", symbolSize: 7, itemStyle: { color: parsial(k) ? "#fff" : c, borderColor: c, borderWidth: 1.6 } }; }) };
+    });
+    title("t6", "6 · Transfer dan tunai per bulan");
+    C.c6.setOption({ animation: false, tooltip: Object.assign({ trigger: "axis", valueFormatter: function (v) { return jt(v); } }, TT),
+      legend: { left: 4, top: 0, itemWidth: 18, textStyle: { color: INK, fontSize: 11.5, fontFamily: FONT }, data: D.met },
+      grid: { left: 52, right: 14, top: 30, bottom: 52 },
+      xAxis: ax({ type: "category", data: bulan.map(bulanLabel), axisLabel: { color: INK2, fontSize: 10.5, rotate: 45, fontFamily: FONT }, splitLine: { show: false } }),
+      yAxis: ax({ type: "value", min: 0, axisLabel: { color: INK2, fontSize: 11, formatter: function (v) { return "Rp" + Math.round(v / 1e6) + " jt"; } } }),
+      series: s6 }, true);
+
+    // ---- 10 · penjualan per hari kalender
+    var hariAktif = hariList.filter(function (h) { return !F.bln || bulanKey(h) === F.bln; });
+    var nHari = [0, 0, 0, 0, 0, 0, 0]; hariAktif.forEach(function (h) { nHari[hariKe(h)]++; });
+    var tHari = [0, 0, 0, 0, 0, 0, 0]; r.forEach(function (x) { tHari[hariKe(x.tgl)] += x.tot; });
+    var v10 = tHari.map(function (v, i) { return nHari[i] ? v / nHari[i] : 0; });
+    var iMin = v10.indexOf(Math.min.apply(null, v10)), iMax = v10.indexOf(Math.max.apply(null, v10));
+    title("t10", "10 · Terendah " + HARI[iMin] + " (" + rb(v10[iMin]) + "/hari), tertinggi " + HARI[iMax] + " (" + rb(v10[iMax]) + "/hari)");
+    C.c10.setOption({ animation: false, tooltip: Object.assign({ trigger: "axis", valueFormatter: function (v) { return rb(v) + "/hari"; } }, TT),
+      grid: { left: 58, right: 10, top: 20, bottom: 28 },
+      xAxis: ax({ type: "category", data: HARI, splitLine: { show: false } }),
+      yAxis: ax({ type: "value", min: 0, axisLabel: { color: INK2, fontSize: 11, formatter: function (v) { return "Rp" + Math.round(v / 1e3) + " rb"; } } }),
+      series: [{ type: "bar", barWidth: "62%", data: v10.map(function (v, i) { return { value: v, itemStyle: { color: i === iMin ? ORANGE : GRAY } }; }),
+        label: { show: true, position: "top", fontSize: 10.5, color: INK, formatter: function (p) { return Math.round(p.value / 1e3); } } }] }, true);
+
+    // ---- 2 · kategori
+    var gk = grp(r, function (x) { return x.kat; }, function (x) { return x.tot; });
+    var d2 = Object.keys(gk).map(function (k) { return { k: +k, v: gk[k] }; }).sort(function (a, b) { return a.v - b.v; });
+    var top2 = d2[d2.length - 1];
+    title("t2", top2 ? "2 · " + D.kat[top2.k] + " menyumbang " + pct(top2.v / tot) + " penjualan" : "2 · Penjualan per kategori");
+    C.c2.setOption({ animation: false, tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" }, valueFormatter: function (v) { return jt(v); } }, TT),
+      grid: { left: 70, right: 16, top: 10, bottom: 26 },
+      xAxis: ax({ type: "value", max: function (m) { return Math.ceil(m.max * 1.42 / 5e7) * 5e7; }, axisLabel: { color: INK2, fontSize: 11, formatter: function (v) { return "Rp" + Math.round(v / 1e6) + " jt"; } } }),
+      yAxis: ax({ type: "category", data: d2.map(function (x) { return D.kat[x.k]; }), splitLine: { show: false } }),
+      series: [{ type: "bar", barWidth: "62%", cursor: "pointer", data: d2.map(function (x, i) { return { value: x.v, kat: x.k, itemStyle: { color: i === d2.length - 1 ? BLUE : GRAY } }; }),
+        label: { show: true, position: "right", fontSize: 10.5, color: INK, formatter: function (p) { return jt(p.value) + "  (" + pct(p.value / tot) + ")"; } } }] }, true);
+
+    // ---- 3 · jenis produk
+    var gj = grp(r, function (x) { return x.jenis; }, function (x) { return x.tot; });
+    var d3 = Object.keys(gj).map(function (k) { return { k: +k, v: gj[k] }; }).sort(function (a, b) { return b.v - a.v; });
+    var nm3 = function (i) { return D.jenis[i].split(" (")[0]; };
+    title("t3", d3.length >= 2 ? "3 · " + nm3(d3[0].k) + " = " + koma((d3[0].v / d3[1].v).toFixed(1)) + "× jenis produk terlaris kedua" : "3 · Penjualan per jenis produk");
+    C.c3.setOption({ animation: false, tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" }, valueFormatter: function (v) { return jt(v); } }, TT),
+      grid: { left: 52, right: 8, top: 20, bottom: 42 },
+      xAxis: ax({ type: "category", data: d3.map(function (x) { return nm3(x.k); }), axisLabel: { color: INK2, fontSize: 10, interval: 0, width: 72, overflow: "break", fontFamily: FONT }, splitLine: { show: false } }),
+      yAxis: ax({ type: "value", min: 0, axisLabel: { color: INK2, fontSize: 11, formatter: function (v) { return "Rp" + Math.round(v / 1e6) + " jt"; } } }),
+      series: [{ type: "bar", barWidth: "62%", data: d3.map(function (x, i) { return { value: x.v, itemStyle: { color: i === 0 ? BLUE : GRAY } }; }),
+        label: { show: true, position: "top", fontSize: 10.5, color: INK, formatter: function (p) { return koma((p.value / 1e6).toFixed(1)); } } }] }, true);
+
+    // ---- 7 · porsi unit vs nilai
+    var gu = grp(r, function (x) { return x.kat; }, function (x) { return x.qty; });
+    var k7 = D.kat.map(function (_, i) { return i; }).filter(function (i) { return gk[i]; });
+    var pu = k7.map(function (i) { return unit ? (gu[i] || 0) / unit : 0; }), pn = k7.map(function (i) { return tot ? (gk[i] || 0) / tot : 0; });
+    title("t7", "7 · Porsi unit vs porsi nilai penjualan per kategori");
+    var lab7 = { show: true, position: "top", fontSize: 10, color: INK, formatter: function (p) { return pct(p.value); } };
+    C.c7.setOption({ animation: false, tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" }, valueFormatter: function (v) { return pct(v); } }, TT),
+      legend: { right: 4, top: 0, itemWidth: 14, textStyle: { color: INK, fontSize: 11.5, fontFamily: FONT } },
+      grid: { left: 42, right: 8, top: 30, bottom: 26 },
+      xAxis: ax({ type: "category", data: k7.map(function (i) { return D.kat[i]; }), splitLine: { show: false } }),
+      yAxis: ax({ type: "value", min: 0, axisLabel: { color: INK2, fontSize: 11, formatter: function (v) { return Math.round(v * 100) + "%"; } } }),
+      series: [{ name: "Porsi unit", type: "bar", barGap: "4%", barWidth: "34%", itemStyle: { color: GRAYD }, data: pu, label: lab7 },
+               { name: "Porsi nilai penjualan", type: "bar", barWidth: "34%", itemStyle: { color: BLUE }, data: pn, label: lab7 }] }, true);
+
+    // ---- 4 · peta kecamatan
+    var gc = grp(r, function (x) { return x.kec; }, function (x) { return x.tot; });
+    var d4 = Object.keys(gc).map(function (k) { var n = D.kec[+k]; return { k: +k, n: n, v: gc[k], pj: gc[k] / B.penduduk[n], peta: B.namaPeta[n] }; })
+      .filter(function (x) { return x.v > 0; }).sort(function (a, b) { return b.v - a.v; });
+    var perPeta = {}; d4.forEach(function (x) { perPeta[x.peta] = (perPeta[x.peta] || 0) + x.v; });
+    var maxPeta = Math.max.apply(null, Object.keys(perPeta).map(function (k) { return perPeta[k]; }).concat([1]));
+    var ramp = ["#CDE2FB", "#6DA7EC", "#2A78D6", "#104281"];
+    function warnaPeta(n) { if (!perPeta[n]) return "#F1F0EC"; var t = perPeta[n] / maxPeta * (ramp.length - 1), i = Math.min(Math.floor(t), ramp.length - 2), f = t - i;
+      var a = parseInt(ramp[i].slice(1), 16), b = parseInt(ramp[i + 1].slice(1), 16), c = [16, 8, 0].map(function (s) { return Math.round(((a >> s) & 255) * (1 - f) + ((b >> s) & 255) * f); });
+      return "rgb(" + c.join(",") + ")"; }
+    title("t4", d4.length ? "4 · " + d4[0].n + " terbesar: " + pct(d4[0].v / tot) + " penjualan" : "4 · Penjualan per kecamatan");
+    C.c4.setOption({ animation: false, tooltip: Object.assign({ trigger: "item", formatter: function (p) { return p.name + (perPeta[p.name] ? "<br>" + jt(perPeta[p.name]) : "<br>belum ada transaksi"); } }, TT),
+      series: [{ type: "map", map: "kotabaru", roam: false, aspectScale: 1, selectedMode: false, boundingCoords: [[115.45, -2.25], [116.62, -4.80]], layoutCenter: ["50%", "50%"], layoutSize: "100%",
+        label: { show: false }, emphasis: { label: { show: false }, itemStyle: { areaColor: ORANGE } },
+        itemStyle: { borderColor: "#fff", borderWidth: 0.6 },
+        data: B.geo.features.map(function (f) { var n = f.properties.name; return { name: n, itemStyle: { areaColor: warnaPeta(n) } }; }) }] }, true);
+    document.getElementById("l4").innerHTML = d4.map(function (x, i) {
+      return '<div class="it' + (i === 0 ? " top" : "") + '" data-kec="' + x.k + '"><span class="sw" style="background:' + warnaPeta(x.peta) + '"></span><span><span class="nm">' + x.n +
+        '</span><br><span class="dt">' + jt(x.v) + " (" + pct(x.v / tot) + ") · Rp" + ribuan(x.pj) + "/jiwa</span></span></div>"; }).join("");
+
+    // ---- 9 · heatmap kecamatan × kategori
+    var kc = D.kec.map(function (_, i) { return i; }).filter(function (i) { return gc[i]; }).sort(function (a, b) { return gc[b] - gc[a]; });
+    var kk = D.kat.map(function (_, i) { return i; }).filter(function (i) { return gk[i]; });
+    var cell = {}; r.forEach(function (x) { var k = x.kec + "|" + x.kat; cell[k] = (cell[k] || 0) + x.tot; });
+    var h9 = []; kc.forEach(function (c, yi) { kk.forEach(function (k, xi) { h9.push([xi, kc.length - 1 - yi, (cell[c + "|" + k] || 0) / gc[c]]); }); });
+    title("t9", "9 · Komposisi kategori di tiap kecamatan (tiap baris = 100%)");
+    C.c9.setOption({ animation: false, tooltip: Object.assign({ formatter: function (p) { return D.kec[kc[kc.length - 1 - p.value[1]]] + " · " + D.kat[kk[p.value[0]]] + "<br>" + pct(p.value[2]); } }, TT),
+      grid: { left: 112, right: 6, top: 6, bottom: 26 },
+      xAxis: { type: "category", data: kk.map(function (i) { return D.kat[i]; }), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: INK2, fontSize: 11, fontFamily: FONT, interval: 0 }, splitArea: { show: false } },
+      yAxis: { type: "category", data: kc.map(function (i) { return D.kec[i]; }).reverse(), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: INK2, fontSize: 11, fontFamily: FONT } },
+      visualMap: { show: false, min: 0, max: 0.8, inRange: { color: ["#F4F8FE", "#86B6EF", "#1C5CAB"] } },
+      series: [{ type: "heatmap", itemStyle: { borderColor: "#fff", borderWidth: 2 },
+        label: { show: true, fontSize: 11, formatter: function (p) { return Math.round(p.value[2] * 100); } },
+        data: h9.map(function (v) { return { value: v, label: { color: v[2] > 0.45 ? "#fff" : INK } }; }) }] }, true);
+
+    // ---- 5 · saluran (donat)
+    var gs = grp(r, function (x) { return x.sal; }, function (x) { return x.tot; });
+    var d5 = Object.keys(gs).map(function (k) { return { k: +k, v: gs[k] }; }).sort(function (a, b) { return b.v - a.v; });
+    var W5 = { "WhatsApp": AQUA, "Via Pengurus BKMT": GRAYD, "Langsung": GRAY };
+    title("t5", d5.length ? "5 · " + D.sal[d5[0].k] + " saluran terbesar: " + pct(d5[0].v / tot) + " penjualan" : "5 · Penjualan per saluran");
+    C.c5.setOption({ animation: false, tooltip: Object.assign({ trigger: "item", formatter: function (p) { return p.name + "<br>" + jt(p.value) + " (" + pct(p.value / tot) + ")"; } }, TT),
+      title: { text: jt(tot), subtext: "total", left: "center", top: "41%", textStyle: { fontSize: 12, fontWeight: 700, color: INK, fontFamily: FONT }, subtextStyle: { fontSize: 10.5, color: INK2 }, itemGap: 2 },
+      series: [{ type: "pie", radius: ["60%", "88%"], startAngle: 90, clockwise: true, label: { show: false }, itemStyle: { borderColor: "#fff", borderWidth: 2 },
+        data: d5.map(function (x) { return { name: D.sal[x.k], value: x.v, itemStyle: { color: W5[D.sal[x.k]] } }; }) }] }, true);
+    document.getElementById("l5").innerHTML = d5.map(function (x, i) {
+      return '<div class="it' + (i === 0 ? " top" : "") + '"><span class="sw" style="background:' + W5[D.sal[x.k]] + '"></span><span><span class="nm">' + D.sal[x.k] +
+        '</span><br><span class="dt">' + pct(x.v / tot) + " · " + jt(x.v) + "</span></span></div>"; }).join("");
+
+    // ---- 8 · metode bayar di tiap saluran (% transaksi)
+    var cnt = {}; r.forEach(function (x) { var k = x.sal + "|" + x.met; cnt[k] = (cnt[k] || 0) + 1; });
+    var s8 = D.sal.map(function (_, i) { return i; }).filter(function (i) { return (cnt[i + "|0"] || 0) + (cnt[i + "|1"] || 0) > 0; });
+    title("t8", "8 · Metode bayar di tiap saluran (% transaksi)");
+    C.c8.setOption({ animation: false, tooltip: Object.assign({ trigger: "axis", axisPointer: { type: "shadow" }, valueFormatter: function (v) { return pct(v); } }, TT),
+      legend: { bottom: 0, itemWidth: 14, textStyle: { color: INK, fontSize: 11.5, fontFamily: FONT } },
+      grid: { left: 118, right: 12, top: 8, bottom: 48 },
+      xAxis: ax({ type: "value", max: 1, axisLabel: { color: INK2, fontSize: 11, formatter: function (v) { return Math.round(v * 100) + "%"; } } }),
+      yAxis: ax({ type: "category", inverse: true, data: s8.map(function (i) { return D.sal[i]; }), splitLine: { show: false } }),
+      series: D.met.map(function (m, j) { return { name: m, type: "bar", stack: "a", barWidth: "55%", itemStyle: { color: j === 0 ? BLUE : ORANGE, borderColor: "#fff", borderWidth: 1.5 },
+        label: { show: true, color: "#fff", fontWeight: 700, fontSize: 11, formatter: function (p) { return p.value > 0.1 ? pct(p.value) : ""; } },
+        data: s8.map(function (i) { var a = cnt[i + "|0"] || 0, b = cnt[i + "|1"] || 0; return (j === 0 ? a : b) / (a + b); }) }; }) }, true);
+  }
+
+  // ---------- klik untuk menyaring ----------
+  C.c1.on("click", function (p) { setF(fB, (F.bln ? [F.bln] : bulanAll)[p.dataIndex]); });
+  C.c2.on("click", function (p) { if (p.data && p.data.kat != null) setF(fK, p.data.kat); });
+  document.getElementById("l4").addEventListener("click", function (e) { var it = e.target.closest(".it"); if (it) setF(fC, it.getAttribute("data-kec")); });
+
+  render();
+})();
+</script>
+</body>
+</html>
