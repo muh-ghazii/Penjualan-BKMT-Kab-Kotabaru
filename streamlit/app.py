@@ -304,6 +304,17 @@ with tab_dash:
                 xs, ys = [q[0] for q in r], [q[1] for q in r]
                 fig.add_trace(go.Scatter(x=xs, y=ys, mode="lines", fill="toself", fillcolor=warna, line=dict(color="white", width=0.6),
                                          hoveron="fills", hovertemplate=hover, showlegend=False))
+        # Legenda gradasi di samping peta: gelap = porsi penjualan besar, terang = kecil (dalam % dari total)
+        pmax = vmax / total * 100
+        fig.add_trace(go.Scatter(
+            x=[116.0, 116.0], y=[-3.5, -3.5], mode="markers", hoverinfo="skip", showlegend=False,
+            marker=dict(size=0.1, opacity=0, color=[0, pmax], cmin=0, cmax=pmax,
+                        colorscale=skala, showscale=True,
+                        colorbar=dict(title=dict(text="% penjualan", side="top", font=dict(color=INK, size=11)),
+                                      orientation="v", thickness=14, len=0.75, x=1.0, xanchor="left", y=0.5,
+                                      tickmode="array", tickvals=[pmax * i / 4 for i in range(5)],
+                                      ticktext=[pct(pmax * i / 4 / 100, 0 if pmax >= 8 else 1) for i in range(5)],
+                                      tickfont=dict(color=INK, size=11), outlinewidth=0))))
         rapikan(fig, "4 · Peta penjualan per kecamatan", legend=False)
         fig.update_xaxes(visible=False, range=[115.45, 116.62], scaleanchor="y", scaleratio=1)
         fig.update_yaxes(visible=False, range=[-4.80, -2.25])
