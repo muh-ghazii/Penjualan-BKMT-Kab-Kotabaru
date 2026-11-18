@@ -163,8 +163,9 @@ def rapikan(fig, judul, tinggi=420, legend=True):
     fig.update_layout(
         title=dict(text="<b>%s</b>" % judul, x=0.0, xanchor="left", font=dict(size=14, color=INK)),
         height=tinggi, margin=dict(l=10, r=10, t=60, b=10), template="plotly_white",
-        font=dict(color=INK2), showlegend=legend, hoverlabel=dict(bgcolor="white"),
-        legend=dict(orientation="h", y=-0.18, x=0),
+        font=dict(color=INK), showlegend=legend, hoverlabel=dict(bgcolor="white", font=dict(color=INK)),
+        paper_bgcolor="#FFFFFF", plot_bgcolor="#FFFFFF",
+        legend=dict(orientation="h", y=-0.18, x=0, font=dict(color=INK)),
     )
     fig.update_xaxes(gridcolor=GRID, zeroline=False)
     fig.update_yaxes(gridcolor=GRID, zeroline=False)
@@ -187,7 +188,7 @@ def minta_filter(kolom_state, nilai):
 def klik(fig, key, kolom_state, nilai_dari="y"):
     """Tampilkan grafik; bila batang/irisan diklik, nilainya ditambahkan ke filter di sidebar."""
     ev = st.plotly_chart(fig, key="%s_%d" % (key, st.session_state["ver"]), on_select="rerun",
-                         selection_mode="points", width="stretch", config={"displaylogo": False})
+                         selection_mode="points", width="stretch", config={"displaylogo": False}, theme=None)
     pts = ev.selection.points if ev and ev.selection else []
     if pts:
         pt = pts[0]
@@ -247,7 +248,7 @@ with tab_dash:
         rapikan(fig, "3 · Penjualan per jenis produk", legend=False)
         fig.update_xaxes(range=[0, d["T"].max() * 1.25], tickformat=",.0s")
         fig.update_yaxes(automargin=True)
-        st.plotly_chart(fig, width="stretch", config={"displaylogo": False})
+        st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
 
     c1, c2, c3 = st.columns(3)
 
@@ -279,7 +280,7 @@ with tab_dash:
         fig.update_xaxes(visible=False, range=[115.45, 116.62], scaleanchor="y", scaleratio=1)
         fig.update_yaxes(visible=False, range=[-4.80, -2.25])
         fig.update_layout(margin=dict(l=0, r=0, t=50, b=0))
-        st.plotly_chart(fig, width="stretch", config={"displaylogo": False})
+        st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
         urut = pk.sort_values("T", ascending=False)
         st.caption("Terbesar: **%s** (%s). Biru lebih gelap = penjualan lebih besar; abu-abu = belum ada transaksi. "
                    "P. Laut Sigam digabung dengan P. Laut Utara pada peta GADM." % (urut.iloc[0]["Kecamatan"], pct(urut.iloc[0]["T"] / total)))
@@ -326,7 +327,7 @@ with tab_dash:
         rapikan(fig, "7 · Porsi unit vs porsi nilai penjualan per kategori")
         fig.update_layout(barmode="group")
         fig.update_yaxes(tickformat=".0%", range=[0, max(d["Porsi Unit"].max(), d["Porsi Nilai"].max()) * 1.25])
-        st.plotly_chart(fig, width="stretch", config={"displaylogo": False})
+        st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
 
     # 8
     with c2:
@@ -337,7 +338,7 @@ with tab_dash:
         rapikan(fig, "8 · Transaksi per saluran dan metode")
         fig.update_xaxes(title=None)
         fig.update_yaxes(title=None)
-        st.plotly_chart(fig, width="stretch", config={"displaylogo": False})
+        st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
 
     # 9
     with c3:
@@ -350,7 +351,7 @@ with tab_dash:
         rapikan(fig, "9 · Penjualan kecamatan × kategori produk", legend=False)
         fig.update_yaxes(autorange="reversed", gridcolor="white")
         fig.update_xaxes(gridcolor="white")
-        st.plotly_chart(fig, width="stretch", config={"displaylogo": False})
+        st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
 
     c1 = st.container()
 
@@ -366,7 +367,7 @@ with tab_dash:
         rapikan(fig, "10 · Rata-rata penjualan per hari dalam seminggu", legend=False)
         fig.update_xaxes(categoryorder="array", categoryarray=HARI)
         fig.update_yaxes(range=[0, h["Rata"].max() * 1.2], tickformat=",.0s")
-        st.plotly_chart(fig, width="stretch", config={"displaylogo": False})
+        st.plotly_chart(fig, width="stretch", config={"displaylogo": False}, theme=None)
 
 # ------------------------------------------------------------------ tab data
 with tab_data:
